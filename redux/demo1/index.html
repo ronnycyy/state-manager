@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>redux demo</title>
+</head>
+
+<body>
+  <!-- ESM -->
+  <script type="module">
+    import { createStore } from './redux/index.js';
+    const initState = {
+      counter: {
+        count: 0
+      },
+      info: {
+        name: '',
+        description: ''
+      }
+    }
+    const store = createStore(initState);
+    // 订阅者1
+    store.subscribe(() => {
+      const state = store.getState();
+      console.log(`${state.info.name}--${state.info.description}`);
+    });
+    // 订阅者2
+    store.subscribe(() => {
+      const state = store.getState();
+      console.log(state.counter.count);
+    });
+    // 改变状态1
+    store.changeState({
+      ...store.getState(),
+      info: {
+        name: 'redux',
+        description: '手写redux'
+      }
+    })
+    // 改变状态2
+    store.changeState({
+      ...store.getState(),
+      counter: {
+        count: 1
+      },
+    })
+  </script>
+</body>
+
+</html>

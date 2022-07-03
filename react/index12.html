@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8" />
+  <title>利用 React.memo 将`引用比较`变为`浅比较`</title>
+  <script src="./react.development.js"></script>
+  <script src="./react-dom.development.js"></script>
+  <script src="./babel.min.js"></script>
+</head>
+
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+    const { Fragment, useState } = React;
+
+    function App() {
+      console.log('App render~');
+      return (
+        <div>
+          <h1>利用 React.memo 将`引用比较`变为`浅比较`，这样更容易命中`复用逻辑`。但需要遍历属性、对比，所以性能消耗也会增大</h1>
+          <Input />
+          <Expensive />
+        </div>
+      );
+    }
+
+    const MemoUnderInput = React.memo(UnderInput);
+
+    function Input() {
+      console.log('Input render~');
+      const [text, setText] = useState('');
+
+      return (
+        <Fragment>
+          <input value={text} onChange={(e) => setText(e.target.value)} />
+          <p>text is {text}</p>
+          {/* <UnderInput /> */}
+          {/*
+            React.memo 仅检查 props 变更。默认情况下会对复杂对象做浅层对比。
+            所以不是引用比较了，那么就不会受 Input 影响重新执行，而是不执行。
+          */}
+          <MemoUnderInput />
+        </Fragment>
+      )
+    }
+
+    // 受到 Input 重新执行的影响，UnderInput 也会重新执行。 
+    // props是空，也就是一个空对象，重新执行就是一个新的空对象，引用变了, newProps !== oldProps，无法进入 bailout 逻辑。
+    function UnderInput() {
+      console.log('UnderInput render~');
+      return <p>underInput</p>
+    }
+
+    function Expensive() {
+      console.log('Expensive render~');
+
+      let now = performance.now();
+      while (performance.now() - now < 100) { }
+      console.log('耗时的组件render');
+      return <p>耗时的组件</p>
+    }
+
+    ReactDOM.render(<App />, document.getElementById("root"));
+  </script>
+</body>
+
+</html>

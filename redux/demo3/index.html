@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>redux demo3</title>
+</head>
+
+<body>
+  <!-- ESM -->
+  <script type="module">
+    import { createStore, combineReducers } from './redux/index.js';
+
+    import counterReducer from './reducers/counter.js';
+    import infoReducer from './reducers/info.js';
+
+    const reducer = combineReducers({
+      // 需要和 initState 的 key 同名
+      counter: counterReducer,
+      info: infoReducer
+    })
+
+    const initState = {
+      counter: {
+        count: 0
+      },
+      info: {
+        name: '',
+        description: ''
+      }
+    }
+    const store = createStore(reducer, initState);
+
+    // 订阅者
+    store.subscribe(() => {
+      const state = store.getState();
+      console.log('[状态改变]', state);
+    });
+    store.dispatch({ type: 'ADD' });
+    store.dispatch({ type: 'SET_NAME', name: 'ronny' });
+    store.dispatch({ type: 'SET_DESCRIPTION', description: 'just so so' });
+  </script>
+</body>
+
+</html>

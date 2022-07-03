@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>redux demo2</title>
+</head>
+
+<body>
+  <!-- ESM -->
+  <script type="module">
+    import { createStore } from './redux/index.js';
+    import reducer from './reducer.js';
+
+    const initState = { count: 0 };
+    const store = createStore(reducer, initState);
+
+    // 订阅者
+    store.subscribe(() => {
+      const state = store.getState();
+      console.log('收到通知:', state.count);
+    });
+    // 改变状态
+    store.dispatch({ type: 'ADD' });
+    // 改变状态
+    store.dispatch({ type: 'ADD' });
+  </script>
+</body>
+
+</html>

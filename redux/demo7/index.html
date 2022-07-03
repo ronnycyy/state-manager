@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>redux demo7</title>
+  <!-- 实现 actions分层 -->
+</head>
+
+<body>
+  <!-- ESM -->
+  <script type="module">
+    import { createStore, combineReducers, applyMiddleware, bindActionCreators } from './redux/index.js';
+
+    import { Add } from './actions/counter.js';
+    import { setName } from './actions/info.js';
+
+    import counterReducer from './reducers/counter.js';
+    import infoReducer from './reducers/info.js';
+
+    import timeMiddleware from './middlewares/timeMiddleware.js';
+    import loggerMiddleware from './middlewares/loggerMiddleware.js';
+    import exceptionMiddleware from './middlewares/exceptionMiddleware.js';
+
+    const reducer = combineReducers({
+      counter: counterReducer,
+      info: infoReducer
+    })
+
+    const rewriteCreateStoreFunction = applyMiddleware(exceptionMiddleware, timeMiddleware, loggerMiddleware);
+    const store = createStore(reducer, {}, rewriteCreateStoreFunction);
+
+    const actions = bindActionCreators(
+      {
+        Add,
+        setName
+      },
+      store.dispatch
+    );
+
+    // 相当于 store.dispatch({ type: 'ADD' });
+    actions.Add();
+    // 相当于 store.dispatch({ type: 'SET_NAME', name: 'ronny' });
+    actions.setName();
+
+    store.subscribe(() => {
+      const state = store.getState();
+    });
+
+  </script>
+</body>
+
+</html>

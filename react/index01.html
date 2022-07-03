@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8" />
+  <title>将变与不变分离</title>
+  <script src="./react.development.js"></script>
+  <script src="./react-dom.development.js"></script>
+  <script src="./babel.min.js"></script>
+</head>
+
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+    const { Fragment, useState } = React;
+
+    function App() {
+      console.log('App render~');
+      return (
+        <div>
+          <h1>将变的部分和不变的部分分离</h1>
+          {/* 抽离了变的部分，现在只是 Input 组件重新渲染 Expensive 不会 render 了 */}
+          <Input />
+          {/* beginWork 中取得 newProps 和 oldProps，判断是相等的 */}
+          <Expensive />
+        </div>
+      );
+    }
+
+    function Input() {
+      console.log('Input render~');
+      const [text, setText] = useState('');
+
+      // 协调阶段:  App -> div -> h1 -> Input(执行) -> Expensive (深度优先遍历)
+      // 前面都对比对比, 没变化没变化,  bailout bailout..., 直到 Input, 发现前后 state 不一致，于是执行。 
+      // App 被 bailout 了，不会执行的!  "App render~" 不会打印。
+
+      return (
+        <Fragment>
+          <input value={text} onChange={(e) => setText(e.target.value)} />
+          <p>text is {text}</p>
+        </Fragment>
+      )
+    }
+
+    // 这个组件每次渲染都要花费至少100ms
+    function Expensive() {
+      console.log('Expensive render~');
+
+      let now = performance.now();
+      while (performance.now() - now < 100) { }
+      console.log('耗时的组件render');
+      return <p>耗时的组件</p>
+    }
+
+    ReactDOM.render(<App />, document.getElementById("root"));
+  </script>
+</body>
+
+</html>

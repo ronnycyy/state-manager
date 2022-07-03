@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>redux demo8</title>
+  <!-- 
+      1. 订阅后，返回一个取消订阅的方法  (createStore.js)
+      2. 提供一个替换 reducer 的方法
+   -->
+</head>
+
+<body>
+  <!-- ESM -->
+  <script type="module">
+    import { createStore, combineReducers, applyMiddleware, bindActionCreators } from './redux/index.js';
+
+    import { Add } from './actions/counter.js';
+    import { setName } from './actions/info.js';
+
+    import counterReducer from './reducers/counter.js';
+    import infoReducer from './reducers/info.js';
+
+    import timeMiddleware from './middlewares/timeMiddleware.js';
+    import loggerMiddleware from './middlewares/loggerMiddleware.js';
+    import exceptionMiddleware from './middlewares/exceptionMiddleware.js';
+
+    const reducer = combineReducers({
+      counter: counterReducer,
+    });
+
+    const rewriteCreateStoreFunction = applyMiddleware(exceptionMiddleware, timeMiddleware, loggerMiddleware);
+    const store = createStore(reducer, {}, rewriteCreateStoreFunction);
+
+    // 发现 reducer 不够你用
+    // 动态构建 reducer
+    const nextReducer = combineReducers({
+      counter: counterReducer,
+      info: infoReducer
+    });
+    store.replaceReducer(nextReducer);
+
+    const actions = bindActionCreators(
+      {
+        Add,
+        setName
+      },
+      store.dispatch
+    );
+    // 相当于 store.dispatch({ type: 'ADD' });
+    actions.Add();
+    // 相当于 store.dispatch({ type: 'SET_NAME', name: 'ronny' });
+    // actions.setName();
+
+    // 2秒后退订
+    const unsubscribe = store.subscribe(() => {
+      const state = store.getState();
+    });
+    setTimeout(() => unsubscribe(), 2000);
+
+  </script>
+</body>
+
+</html>

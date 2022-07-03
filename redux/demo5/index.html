@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>redux demo5</title>
+  <!-- 实现 redux 中间件 -->
+</head>
+
+<body>
+  <!-- ESM -->
+  <script type="module">
+    import { createStore, combineReducers } from './redux/index.js';
+
+    import counterReducer from './reducers/counter.js';
+    import infoReducer from './reducers/info.js';
+
+    import timeMiddleware from './middlewares/timeMiddleware.js';
+    import loggerMiddleware from './middlewares/loggerMiddleware.js';
+    import exceptionMiddleware from './middlewares/exceptionMiddleware.js';
+
+    const reducer = combineReducers({
+      counter: counterReducer,
+      info: infoReducer
+    })
+
+    const store = createStore(reducer);
+
+    // 1. 抓一下原始流程
+    const next = store.dispatch;
+    // 2. 返回 (next) => (action) => {...}
+    const time = timeMiddleware(store);
+    const logger = loggerMiddleware(store);
+    const exception = exceptionMiddleware(store);
+    // 3. exception(next)  返回 (action) => {...}
+    // 4. logger(..)  返回 (action) => {...}
+    // 5. time(....) 返回 (action) => {...}
+    // 此时中间件的逻辑已经介入。
+    // 蕴含了巨大的闭包，而且执行流程变成了洋葱模型🧅:  先time, 再logger, 最后exception
+    store.dispatch = time(logger(exception(next)));
+
+    store.subscribe(() => {
+      const state = store.getState();
+    });
+    store.dispatch({ type: 'ADD' });
+    store.dispatch({ type: 'SET_NAME', name: 'ronny' });
+    store.dispatch({ type: 'SET_DESCRIPTION', description: 'just so so' });
+  </script>
+</body>
+
+</html>

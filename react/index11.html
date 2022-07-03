@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8" />
+  <title>父组件state变化，子组件没有变化的也会重新渲染</title>
+  <script src="./react.development.js"></script>
+  <script src="./react-dom.development.js"></script>
+  <script src="./babel.min.js"></script>
+</head>
+
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+    const { Fragment, useState } = React;
+
+    function App() {
+      console.log('App render~');
+      return (
+        <div>
+          <h1>父组件state变化，子组件没有变化的也会重新渲染</h1>
+          <Input />
+          <Expensive />
+        </div>
+      );
+    }
+
+    function Input() {
+      console.log('Input render~');
+      const [text, setText] = useState('');
+
+      return (
+        <Fragment>
+          <input value={text} onChange={(e) => setText(e.target.value)} />
+          <p>text is {text}</p>
+          <UnderInput />
+        </Fragment>
+      )
+    }
+
+    // 受到 Input 重新执行的影响，UnderInput 也会重新执行，因为 props是空，也就是一个空对象，重新执行会是一个新的空对象，引用变了。
+    // 在 React 默认的复用检查中: newProps !== oldProps，无法进入 bailout 逻辑。
+    // 可是 UnderInput 根本就没变啊! 怎么让 Input 重新渲染时，UnderInput 不重新执行呢？  请看 index12.html。
+    function UnderInput() {
+      console.log('UnderInput render~');
+      return <p>underInput</p>
+    }
+
+    function Expensive() {
+      console.log('Expensive render~');
+
+      let now = performance.now();
+      while (performance.now() - now < 100) { }
+      console.log('耗时的组件render');
+      return <p>耗时的组件</p>
+    }
+
+    ReactDOM.render(<App />, document.getElementById("root"));
+  </script>
+</body>
+
+</html>

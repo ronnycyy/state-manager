@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>未优化时</title>
+  <script src="./react.development.js"></script>
+  <script src="./react-dom.development.js"></script>
+  <script src="./babel.min.js"></script>
+</head>
+
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+    const { useState } = React;
+
+    function App() {
+      console.log('App render~');
+      const [text, setText] = useState('');
+
+      return (
+        <div>
+          <h1>未优化，每次更新都花费至少100ms</h1>
+          {/* 父组件的 state, 作为子组件的 props */}
+          <input value={text} onChange={(e) => setText(e.target.value)} />
+          <p>text is {text}</p>
+          <Expensive />
+        </div>
+      );
+    }
+
+    // 这个组件每次渲染都要花费至少100ms
+    function Expensive() {
+      console.log('Expensive render~');
+      let now = performance.now();
+      while (performance.now() - now < 100) { }
+      console.log('耗时的组件render');
+      return <p>耗时的组件</p>
+    }
+
+    ReactDOM.render(<App />, document.getElementById("root"));
+  </script>
+</body>
+
+</html>

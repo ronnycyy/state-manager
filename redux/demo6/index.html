@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>redux demo6</title>
+  <!-- 实现: applyMiddleware.js 合并中间件 -->
+</head>
+
+<body>
+  <!-- ESM -->
+  <script type="module">
+    import { createStore, combineReducers, applyMiddleware } from './redux/index.js';
+
+    import counterReducer from './reducers/counter.js';
+    import infoReducer from './reducers/info.js';
+
+    import timeMiddleware from './middlewares/timeMiddleware.js';
+    import loggerMiddleware from './middlewares/loggerMiddleware.js';
+    import exceptionMiddleware from './middlewares/exceptionMiddleware.js';
+
+    const reducer = combineReducers({
+      counter: counterReducer,
+      info: infoReducer
+    })
+
+    // const next = store.dispatch;
+    // const time = timeMiddleware(store);
+    // const logger = loggerMiddleware(store);
+    // const exception = exceptionMiddleware(store);
+    // store.dispatch = time(logger(exception(next)));
+    // 上面这些合并成一句
+    const rewriteCreateStoreFunction = applyMiddleware(exceptionMiddleware, timeMiddleware, loggerMiddleware)
+
+    const store = createStore(reducer, {}, rewriteCreateStoreFunction);
+
+    store.subscribe(() => {
+      const state = store.getState();
+    });
+    store.dispatch({ type: 'ADD' });
+    store.dispatch({ type: 'SET_NAME', name: 'ronny' });
+    store.dispatch({ type: 'SET_DESCRIPTION', description: 'just so so' });
+  </script>
+</body>
+
+</html>
