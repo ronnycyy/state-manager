@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8" />
+  <title>销毁组件测试demo</title>
+  <script src="./react.development.js"></script>
+  <script src="./react-dom.development.js"></script>
+  <script src="./babel.min.js"></script>
+</head>
+
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+
+    function App() {
+      console.log('App render~');
+      const [visible, setVisible] = useState(true);
+      const [obj, _] = useState({ count: 0 }); 
+
+      return (
+        <div>
+          <h1>销毁组件测试demo</h1>
+          <button onClick={() => setVisible(v => !v)}>开/关</button>
+          { visible && <Son obj={obj} />}
+        </div>
+      );
+    }
+
+    function Son({ obj }) {
+      console.log('Son渲染');
+      const [count, setCount] = useState(obj.count);
+
+      useEffect(() => {
+        return () => console.log('Son 已被销毁');
+      }, [])
+
+      return (
+        <div>
+         <h3>Son</h3>
+         <span>count: {count}</span>
+         <button onClick={() => setCount(s => s + 1)}>增加count</button>
+        </div>
+      )
+    }
+
+    ReactDOM.render(<App />, document.getElementById("root"));
+  </script>
+</body>
+
+</html>
